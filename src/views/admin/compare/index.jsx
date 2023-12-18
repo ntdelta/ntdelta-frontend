@@ -246,7 +246,7 @@ export default function CompareDllReport() {
         name={leftBannerData.dll.name}
         description={leftBannerData.dll.description}
         sha256={leftBannerData.sha256}
-        signing_date={leftBannerData.signing_date}
+        first_seen_date={leftBannerData.first_seen_date}
         version={leftBannerData.version}
         size={leftBannerData.size}
         virtual_size={leftBannerData.virtual_size}
@@ -265,7 +265,7 @@ export default function CompareDllReport() {
         name={rightBannerData.dll.name}
         description={rightBannerData.dll.description}
         sha256={rightBannerData.sha256}
-        signing_date={rightBannerData.signing_date}
+        first_seen_date={rightBannerData.first_seen_date}
         version={rightBannerData.version}
         size={rightBannerData.size}
         virtual_size={rightBannerData.virtual_size}

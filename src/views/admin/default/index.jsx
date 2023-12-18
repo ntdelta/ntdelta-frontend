@@ -149,8 +149,8 @@ export default function UserReports() {
         id={dll.first_dll.id}
         versions={ (insiderPreview == false) ? dll.version_map.length : dll.count}
         functions={dll.function_count.toLocaleString()}
-        firstSeen={dll.first_dll ? new Date(Date.parse(dll.first_dll.signing_date)).toLocaleDateString() : "None"}
-        lastSeen={dll.first_dll ? new Date(Date.parse(dll.last_dll.signing_date)).toLocaleDateString(): "None"}
+        firstSeen={dll.first_dll ? new Date(Date.parse(dll.first_dll.first_seen_date)).toLocaleDateString() : "None"}
+        lastSeen={dll.first_dll ? new Date(Date.parse(dll.last_dll.first_seen_date)).toLocaleDateString(): "None"}
         versionMap={[...dll.version_map].reverse()}
         firstWindowsVersion={dll.windows_versions ? dll.windows_versions.find(obj => obj.id === findOldestUpdate(dll.first_dll).windows_version).version :"" }
         lastWindowsVersion={dll.windows_versions ? dll.windows_versions.find(obj => obj.id === findNewestUpdate(dll.last_dll).windows_version).version :"" }

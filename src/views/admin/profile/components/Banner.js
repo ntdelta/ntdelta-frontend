@@ -94,7 +94,7 @@ export default function Banner(props) {
           <Select id={"open_select_" + id}>
               {versionMap.map((option) => (
                   <option value={option.id}>
-                    {option.version.split(" ")[0]}
+                    {option.version.split(" ")[0]}  { (new Date(option.first_seen_date)).toLocaleDateString('en-UK') }
                   </option>
               ))}
           </Select>
@@ -106,7 +106,7 @@ export default function Banner(props) {
           <Select id={"compare_select_"+id}>
               {versionMap.map((option) => (
                   <option value={option.id} >
-                    {option.version.split(" ")[0]}
+                    {option.version.split(" ")[0]}  { (new Date(option.first_seen_date)).toLocaleDateString('en-UK') }
                   </option>
               ))}
           </Select>
