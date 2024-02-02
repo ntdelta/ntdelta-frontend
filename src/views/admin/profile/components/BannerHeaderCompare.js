@@ -57,7 +57,7 @@ export default function BannerHeaderCompare(props) {
               {new Date(Date.parse(first_seen_date)).toLocaleDateString()}
             </Text>
             <Text color={textColorSecondary} fontSize='sm' fontWeight='400'>
-            Siginging Date
+            First Seen
             </Text>
           </Box>
 
