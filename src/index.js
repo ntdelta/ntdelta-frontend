@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import 'assets/css/App.css';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import AdminLayout from 'layouts/admin';
+import QuickDiffModal from 'components/QuickDiffModal.js';
 import { Link, Flex, Box, Image, ChakraProvider, Switch as ChakraSwitch } from '@chakra-ui/react';
 import theme from 'theme/theme';
 import { ThemeEditorProvider } from '@hypertheme-editor/chakra-ui';
@@ -31,6 +32,15 @@ const App = () => {
                     <a href="https://ntdelta.dev">
                         <Image maxWidth="sm" src={avatar} alt="senpai" />
                     </a>
+                    <Box
+                        position="absolute"
+                        top="10px"
+                        left="10px"
+                    >
+                        <Box flex="1" align="right">
+                            <QuickDiffModal/>
+                        </Box>
+                    </Box>
                     <Box
                         position="absolute"
                         top="10px"
