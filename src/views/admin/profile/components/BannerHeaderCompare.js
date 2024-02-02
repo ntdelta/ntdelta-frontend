@@ -9,7 +9,7 @@ export default function BannerHeaderCompare(props) {
     avatar, 
     description, 
     sha256, 
-    signing_date, 
+    first_seen_date, 
     version, 
     size, 
     virtual_size,
@@ -54,7 +54,7 @@ export default function BannerHeaderCompare(props) {
 
            <Box>
             <Text color={textColorPrimary} fontSize='2xl' fontWeight='700'>
-              {new Date(Date.parse(signing_date)).toLocaleDateString()}
+              {new Date(Date.parse(first_seen_date)).toLocaleDateString()}
             </Text>
             <Text color={textColorSecondary} fontSize='sm' fontWeight='400'>
             Siginging Date

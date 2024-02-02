@@ -9,7 +9,7 @@ export default function BannerDLL(props) {
     avatar, 
     description, 
     sha256, 
-    signing_date, 
+    first_seen_date, 
     version, 
     size, 
     virtual_size,

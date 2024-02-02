@@ -18,12 +18,11 @@ import {
   Button,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { MdAutoGraph, MdEqualizer, MdInsights, MdArrowBack,
-  MdArrowForward } from "react-icons/md";
+import { MdAutoGraph } from "react-icons/md";
 import IconBox from "components/icons/IconBox";
 import Card from "components/card/Card.js";
 import MiniStatistics from "components/card/MiniStatistics";
-import { Legend, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import BannerDLL from "views/admin/profile/components/BannerDLL";
 import avatar from "assets/img/avatars/avatar4.png";
 import { InsiderPreviewContext } from "index";
@@ -113,13 +112,13 @@ export default function DllReport() {
       let item = filterInsiderPreview(bannerData).instances[i];
       let formatted_item = {
           name:  item.name,
-          date:  new Date(item.signing_date),
+          date:  new Date(item.first_seen_date),
           "Function Count": item.function_count
         };
 
       let formatted_item_size = {
           name:  item.name,
-          date:  new Date(item.signing_date),
+          date:  new Date(item.first_seen_date),
           Size : Math.round(item.size/1000)
         };
         formatted_data.push(formatted_item);
@@ -127,8 +126,8 @@ export default function DllReport() {
     }
 
     let filteredBannerData = bannerData
-    lowestSigningDate = filteredBannerData.instances[0].version
-    newestSigningDate = filteredBannerData.instances[filteredBannerData.instances.length - 1].version
+    lowestSigningDate = filteredBannerData.instances[0].first_seen_date
+    newestSigningDate = filteredBannerData.instances[filteredBannerData.instances.length - 1].first_seen_date
 
   }
   
@@ -171,7 +170,7 @@ export default function DllReport() {
                   name={paramValue}
                   description={filterInsiderPreview(bannerData).dll.description}
                   sha256={"bannerData.sha256"}
-                  signing_date={"bannerData.signing_date"}
+                  first_seen_date={"bannerData.first_seen_date"}
                   version={"bannerData.version"}
                   size={"bannerData.size"}
                   virtual_size={"bannerData.virtual_size"}
@@ -220,7 +219,7 @@ export default function DllReport() {
                       />
                     }
                     name='First Seen'
-                    value={lowestSigningDate}
+                    value={ (new Date(lowestSigningDate).toLocaleDateString("en-UK"))}
                   />
                 <MiniStatistics
                     startContent={
@@ -234,7 +233,7 @@ export default function DllReport() {
                       />
                     }
                     name='Last Seen'
-                    value={newestSigningDate}
+                    value={ (new Date(newestSigningDate).toLocaleDateString("en-UK"))}
                   />
                 </SimpleGrid>
                 </Box>
@@ -273,6 +272,7 @@ export default function DllReport() {
                   <Thead>
                     <Tr>
                       <Th>DLL Version</Th>
+                      <Th>Date</Th>
                       <Th>OS Version</Th>
                       <Th>Size</Th>
                       <Th>Function Count</Th>
@@ -286,6 +286,7 @@ export default function DllReport() {
                       return (
                         <Tr>
                           <Td>{item.version.split(" ")[0]}</Td>
+                          <Td>{ (new Date(item.first_seen_date)).toLocaleDateString() }</Td>
                           <Td>
                           {Object.entries(GetVersionAndUpdateMap(item.windows_updates)).map(([version, updates]) => (
                             <React.Fragment key={version}>

@@ -146,7 +146,7 @@ export default function DllReport() {
         name={bannerData.dll.name}
         description={bannerData.dll.description}
         sha256={bannerData.sha256}
-        signing_date={bannerData.signing_date}
+        first_seen_date={bannerData.first_seen_date}
         version={bannerData.version}
         size={bannerData.size}
         virtual_size={bannerData.virtual_size}
