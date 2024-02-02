@@ -1,5 +1,12 @@
 import {
-  Avatar,
+  CardBody,
+  Button,
+  VStack,
+  HStack,
+  Spacer,
+  CardFooter,
+  Heading,
+  Stack,
   Box,
   Tag,
   Center,
@@ -11,6 +18,8 @@ import {
   AbsoluteCenter,
   Text,
 } from "@chakra-ui/react";
+
+import { Card as ChakCard } from "@chakra-ui/react";
 import Card from "components/card/Card.js";
 import Select from 'react-select'
 
@@ -21,9 +30,12 @@ import IconBox from "components/icons/IconBox";
 import BannerHeader from "views/admin/profile/components/BannerHeader";
 import avatar from "assets/img/avatars/avatar4.png";
 import React, { useState, useEffect } from "react";
-import { MdAutoGraph, MdEqualizer, MdInsights, MdArrowBack,
-  MdArrowForward } from "react-icons/md";
-import { useLocation, Link } from 'react-router-dom';
+
+import {
+  MdAutoGraph, MdEqualizer, MdInsights, MdArrowBack,
+  MdArrowForward
+} from "react-icons/md";
+import { useLocation, useHistory, Link } from 'react-router-dom';
 
 function getTotalCount(apiResponse) {
   let totalCount = 0;
@@ -38,21 +50,21 @@ function getTotalCount(apiResponse) {
   return totalCount.toLocaleString();
 }
 
-function GetVersionAndUpdateMap(windowsUpdates){
+function GetVersionAndUpdateMap(windowsUpdates) {
 
   const windowsVersions = {};
 
   // Iterate over the updates and group them by Windows version
   for (const update of windowsUpdates) {
-      const versionName = update.windows_version__name;
+    const versionName = update.windows_version__name;
 
-      // If the version doesn't exist in the object, create an empty array for it
-      if (!windowsVersions.hasOwnProperty(versionName)) {
-          windowsVersions[versionName] = [];
-      }
+    // If the version doesn't exist in the object, create an empty array for it
+    if (!windowsVersions.hasOwnProperty(versionName)) {
+      windowsVersions[versionName] = [];
+    }
 
-      // Add the update to the corresponding version
-      windowsVersions[versionName].push(update);
+    // Add the update to the corresponding version
+    windowsVersions[versionName].push(update);
   }
 
   return windowsVersions;
@@ -84,7 +96,7 @@ function fetchData(paramValue, setBannerData, setLoading) {
       setLoading(false);
     }
   };
-}  
+}
 
 function fetchFunctionData(paramValue, setFunctionData, setFunctionLoading) {
   return async () => {
@@ -115,7 +127,27 @@ export default function DllReport() {
   const [selectedFunction, setSelectedFunction] = useState(null);
 
   const location = useLocation();
-  
+  let history = useHistory();
+
+  const handleRedirectDiffClick = (diff_id) => {
+    const queryParams = new URLSearchParams({
+      first_id: paramValue,
+      second_id: diff_id
+    }).toString();
+
+    // Redirect with query parameters
+    history.push(`/admin/compare/?${queryParams}`);
+  };
+
+  const handleOpenClick = (id) => {
+    const queryParams = new URLSearchParams({
+      id: id,
+    }).toString();
+
+    // VStackirect with query parameters
+    history.push(`/admin/dllinstance/?${queryParams}`);
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const newParamValue = params.get("id");
@@ -138,7 +170,7 @@ export default function DllReport() {
 
 
   if (bannerData) {
-    var banners =(
+    var banners = (
       <BannerHeader
         key={bannerData.dll.name}
         gridArea="1 / 1 / 2 / 2"
@@ -156,16 +188,16 @@ export default function DllReport() {
   }
 
   var functionComponents = (
-        <AbsoluteCenter p='4' color='white' axis='both'>
-            <Spinner
-            thickness='4px'
-            speed='0.65s'
-            emptyColor='gray.200'
-            color='blue.500'
-            size='xl'
-          />
-        </AbsoluteCenter>
-      )
+    <AbsoluteCenter p='4' color='white' axis='both'>
+      <Spinner
+        thickness='4px'
+        speed='0.65s'
+        emptyColor='gray.200'
+        color='blue.500'
+        size='xl'
+      />
+    </AbsoluteCenter>
+  )
 
   if (functionLoading == false && functionData) {
 
@@ -173,7 +205,7 @@ export default function DllReport() {
       value: func.id,
       label: func.function_name,
     }));
-    
+
     functionComponents = (
       <Select
         onChange={handleFunctionChange}
@@ -183,31 +215,31 @@ export default function DllReport() {
     )
   }
 
- var functionReady = !loading && !functionLoading && selectedFunction && functionData && bannerData ? functionData.find((func) => func.id === parseInt(selectedFunction)) : null
-var codeBlock = null
-if (!loading && !functionLoading && selectedFunction && functionData && bannerData && functionReady)  {
-  codeBlock = (<ReactDiffViewer showDiffOnly={false} rightTitle={functionReady.function_name} leftTitle={functionReady.function_name} splitView={false} useDarkTheme={true} oldValue={functionReady.function_c} newValue={functionReady.function_c}  />)
-}
+  var functionReady = !loading && !functionLoading && selectedFunction && functionData && bannerData ? functionData.find((func) => func.id === parseInt(selectedFunction)) : null
+  var codeBlock = null
+  if (!loading && !functionLoading && selectedFunction && functionData && bannerData && functionReady) {
+    codeBlock = (<ReactDiffViewer showDiffOnly={false} rightTitle={functionReady.function_name} leftTitle={functionReady.function_name} splitView={false} useDarkTheme={true} oldValue={functionReady.function_c} newValue={functionReady.function_c} />)
+  }
   return (
     <Box>
       {loading ? (
         // Render the spinning wheel while loading
         <Box position='relative' h='100px'>
-  <AbsoluteCenter p='4' color='white' axis='both'>
-    
-  <Spinner
-  thickness='4px'
-  speed='0.65s'
-  emptyColor='gray.200'
-  color='blue.500'
-  size='xl'
-/>
-  </AbsoluteCenter>
-</Box>
+          <AbsoluteCenter p='4' color='white' axis='both'>
+
+            <Spinner
+              thickness='4px'
+              speed='0.65s'
+              emptyColor='gray.200'
+              color='blue.500'
+              size='xl'
+            />
+          </AbsoluteCenter>
+        </Box>
       ) : (
         <>
-            {banners}
-            <Center>
+          {banners}
+          <Center>
             {Object.entries(GetVersionAndUpdateMap(bannerData.windows_updates)).map(([version, updates], index) => (
               <React.Fragment key={version}>
                 <Tag mr={"5px"} size="md" variant="solid" colorScheme="blue">
@@ -218,71 +250,82 @@ if (!loading && !functionLoading && selectedFunction && functionData && bannerDa
                 ))}
               </React.Fragment>
             ))}
-            </Center>
-            <Box mt="20px">
-                  <SimpleGrid
-                    columns={{ base: 1, md: 2, lg: 3 }}
-                    gap="20px"
-                    mb="20px"
-                  >
-                  <Link to={"/admin/dllinstance/?id=" + bannerData.prev_dll.id}>
-                  <MiniStatistics
-                    startContent={
-                      <IconBox
-                        w='56px'
-                        h='56px'
-                        bg={boxBg}
-                        icon={
-                          <Icon w='32px' h='32px' as={MdArrowBack} color={brandColor} />
-                        }
-                      />
+          </Center>
+          <Box mt="20px">
+            <SimpleGrid
+              columns={{ base: 1, md: 2, lg: 3 }}
+              gap="20px"
+              mb="20px"
+            >
+              <ChakCard>
+                <CardBody>
+                  <HStack>
+                    <VStack spacing={4} align="stretch">
+                      <Button variant='solid' colorScheme='blue' isFullWidth onClick={() => handleRedirectDiffClick(bannerData.prev_dll.id)}>
+                        View Diff
+                      </Button>
+                      <Button variant='solid' colorScheme='blue' isFullWidth onClick={() => handleOpenClick(bannerData.prev_dll.id)}>
+                        Open
+                      </Button>
+                    </VStack>
+                    <Spacer /> 
+                    <Stack>
+                      <Heading size='md'>Previous Version</Heading>
+                      <Text>
+                        {bannerData.prev_dll.version.split(" ")[0]}
+                      </Text>
+                    </Stack>
+                  </HStack>
+                </CardBody>
+              </ChakCard>
+              <MiniStatistics
+                startContent={
+                  <IconBox
+                    w='56px'
+                    h='56px'
+                    bg={boxBg}
+                    icon={
+                      <Icon w='32px' h='32px' as={MdAutoGraph} color={brandColor} />
                     }
-                    name='Previous Version'
-                    value={bannerData.prev_dll.version.split(" ")[0]}
                   />
-                  </Link>
-                  <MiniStatistics
-                    startContent={
-                      <IconBox
-                        w='56px'
-                        h='56px'
-                        bg={boxBg}
-                        icon={
-                          <Icon w='32px' h='32px' as={MdAutoGraph} color={brandColor} />
-                        }
-                      />
-                    }
-                    name='Decompiled Functions'
-                    value={bannerData.function_count.toLocaleString()}
-                  />
-                    <Link to={"/admin/dllinstance/?id=" + bannerData.next_dll.id}>
+                }
+                name='Decompiled Functions'
+                value={bannerData.function_count.toLocaleString()}
+              />
+              <ChakCard>
+                <CardBody>
+                  <HStack>
+                    <Stack >
+                      <Heading size='md'>Next Version</Heading>
+                      <Text>
+                        {bannerData.next_dll.version.split(" ")[0]}
+                      </Text>
+                    </Stack>
+                    <Spacer />
+                    <VStack spacing={4} align="stretch">
+                      <Button variant='solid' colorScheme='blue' isFullWidth onClick={() => handleRedirectDiffClick(bannerData.next_dll.id)}>
+                        View Diff
+                      </Button>
+                      <Button variant='solid' colorScheme='blue' isFullWidth onClick={() => handleOpenClick(bannerData.next_dll.id)}>
+                        Open
+                      </Button>
+                    </VStack>
+                  </HStack>
 
-                    <MiniStatistics 
-                    endContent={
-                      <IconBox
-                        w='56px'
-                        h='56px'
-                        bg={boxBg}
-                        icon={
-                          <Icon w='32px' h='32px' as={MdArrowForward} color={brandColor} />
-                        }
-                      />
-                    }
-                  name='Next Version' value={bannerData.next_dll.version.split(" ")[0]} />
-                  </Link>
-                    
-                    </SimpleGrid>
+                </CardBody>
+              </ChakCard>
+            </SimpleGrid>
           </Box>
           <Card mb={{ base: "0px", lg: "20px" }} mt="20px" align='center'>
-              <Text fontWeight='bold' fontSize='xl' mb={"10px"}>
-                Decompiled Functions
-                </Text>
-                {functionComponents}
-            </Card>
+            <Text fontWeight='bold' fontSize='xl' mb={"10px"}>
+              Decompiled Functions
+            </Text>
+            {functionComponents}
+          </Card>
 
           <Code mt="20px" width="100%">
             <pre>
-              {  codeBlock }
+              {codeBlock}
             </pre>
           </Code>
         </>
