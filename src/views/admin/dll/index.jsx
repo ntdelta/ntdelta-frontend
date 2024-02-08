@@ -28,6 +28,7 @@ import avatar from "assets/img/avatars/avatar4.png";
 import { InsiderPreviewContext } from "index";
 import { useContext } from "react";
 import RecentChanges from 'components/RecentChanges';
+import Graph from 'components/Graph';
 
 // Assets
 import React, { useState, useEffect } from "react";
@@ -112,13 +113,13 @@ export default function DllReport() {
     for (let i = 0; i < filterInsiderPreview(bannerData).instances.length; i++) {
       let item = filterInsiderPreview(bannerData).instances[i];
       let formatted_item = {
-        name: item.name,
+        name: item.version,
         date: new Date(item.first_seen_date),
         "Function Count": item.function_count
       };
 
       let formatted_item_size = {
-        name: item.name,
+        name: item.version,
         date: new Date(item.first_seen_date),
         Size: Math.round(item.size / 1000)
       };
@@ -239,26 +240,19 @@ export default function DllReport() {
                 </SimpleGrid>
               </Box>
               <Box>
-                <Text align="center" fontWeight='bold' fontSize='xl' mb={"10px"}>
-                  Function Count
-                </Text>
-                <LineChart width={600} height={300} data={formatted_data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <Line type="monotone" dataKey="Function Count" stroke="#8884d8" />
-                  <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                  <YAxis />
-                  <XAxis dataKey="date" hide={true} />
-                  <Tooltip />
-                </LineChart>
-                <Text align="center" mt={"10px"} fontWeight='bold' fontSize='xl' mb={"10px"}>
-                  Size
-                </Text>
-                <LineChart width={600} height={300} data={formatted_data_size} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <Line type="monotone" dataKey="Size" stroke="#8884d8" />
-                  <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                  <YAxis />
-                  <XAxis dataKey="date" hide={true} />
-                  <Tooltip />
-                </LineChart>
+              <Graph 
+                title="Function Count" 
+                data={formatted_data} 
+                dataKey="Function Count" 
+                color="#8884d8" 
+              />
+
+              <Graph 
+                title="Size" 
+                data={formatted_data_size} 
+                dataKey="Size" 
+                color="#82ca9d" 
+              />
               </Box>
             </SimpleGrid>
           </Center>
