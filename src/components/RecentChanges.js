@@ -10,10 +10,26 @@ const RecentChanges = ({ componentParam }) => {
     const [currentPageAdded, setCurrentPageAdded] = useState(0);
     const [currentPageRemoved, setCurrentPageRemoved] = useState(0);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isRegexCollapsed, setIsRegexCollapsed] = useState(false); // State for regex filters visibility
+    const [isRegexCollapsed, setIsRegexCollapsed] = useState(false);
     const [activeFilters, setActiveFilters] = useState([]);
+    const [filteredAddedFunctionsLength, setFilteredAddedFunctionsLength] = useState(0);
+    const [filteredRemovedFunctionsLength, setFilteredRemovedFunctionsLength] = useState(0);
     const pageSize = 10;
     const toast = useToast();
+
+    useEffect(() => {
+        // Reset the current page for both added and removed functions to the first page
+        setCurrentPageAdded(0);
+        setCurrentPageRemoved(0);
+        
+        // Recalculate filtered data lengths for added and removed functions
+        const { length: addedLength } = filterDataByRegex(addedFunctions);
+        const { length: removedLength } = filterDataByRegex(removedFunctions);
+    
+        setFilteredAddedFunctionsLength(addedLength);
+        setFilteredRemovedFunctionsLength(removedLength);
+    }, [activeFilters]); // This effect runs when `activeFilters` changes.
+    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -24,6 +40,8 @@ const RecentChanges = ({ componentParam }) => {
                 const jsonData = await response.json();
                 setAddedFunctions(jsonData.function_diffs.added_functions);
                 setRemovedFunctions(jsonData.function_diffs.removed_functions);
+                setFilteredAddedFunctionsLength(jsonData.function_diffs.added_functions.length);
+                setFilteredRemovedFunctionsLength(jsonData.function_diffs.removed_functions.length);
             } catch (error) {
                 toast({
                     title: "Error fetching data",
@@ -54,7 +72,6 @@ const RecentChanges = ({ componentParam }) => {
 
     const toggleCollapse = () => {
         setIsCollapsed(!isCollapsed);
-        // Automatically collapse regex filters when hiding recent changes
         if (!isCollapsed) setIsRegexCollapsed(true);
     };
 
@@ -63,17 +80,19 @@ const RecentChanges = ({ componentParam }) => {
     };
 
     const filterDataByRegex = (data) => {
-        if (activeFilters.length === 0) return data;
-        return data.filter((func) =>
-            activeFilters.every(pattern => 
-                new RegExp(pattern).test(func)
-            )
+        if (activeFilters.length === 0) {
+            return { filteredData: data, length: data.length };
+        }
+        const filteredData = data.filter((func) =>
+            activeFilters.every((pattern) => new RegExp(pattern).test(func))
         );
+        return { filteredData, length: filteredData.length };
     };
+
 
     const renderTableData = (data, currentPage) => {
         const startIndex = currentPage * pageSize;
-        const filteredData = filterDataByRegex(data);
+        const { filteredData } = filterDataByRegex(data); // Use destructuring to get filteredData
         const selectedFunctions = filteredData.slice(startIndex, startIndex + pageSize);
         return selectedFunctions.map((func, index) => (
             <Tr key={index}>
@@ -81,6 +100,7 @@ const RecentChanges = ({ componentParam }) => {
             </Tr>
         ));
     };
+    
 
     const handlePageChange = (setPageFunction, currentPage, change) => {
         setPageFunction(currentPage + change);
@@ -113,8 +133,7 @@ const RecentChanges = ({ componentParam }) => {
                         ))}
                     </HStack>
                 </Collapse>
-                 <Flex direction={{ base: "column", md: "row" }} gap="10">
-                    {/* Added Functions Table */}
+                <Flex direction={{ base: "column", md: "row" }} gap="10">
                     <Box flex="1">
                         <HStack justifyContent="space-between">
                             <Box>
@@ -129,7 +148,7 @@ const RecentChanges = ({ componentParam }) => {
                                 </Button>
                                 <Button
                                     onClick={() => handlePageChange(setCurrentPageAdded, currentPageAdded, 1)}
-                                    isDisabled={currentPageAdded >= Math.ceil(addedFunctions.length / pageSize) - 1}
+                                    isDisabled={currentPageAdded >= Math.ceil(filteredAddedFunctionsLength / pageSize) - 1}
                                 >
                                     Next
                                 </Button>
@@ -145,7 +164,7 @@ const RecentChanges = ({ componentParam }) => {
                                             <Th>Function Name</Th>
                                         </Tr>
                                     </Thead>
-                                    <Tbody>{renderTableData(addedFunctions, currentPageAdded)}</Tbody>
+                                    <Tbody>{renderTableData(addedFunctions, currentPageAdded, setFilteredAddedFunctionsLength)}</Tbody>
                                 </Table>
                             </Card>
                         )}
@@ -162,7 +181,7 @@ const RecentChanges = ({ componentParam }) => {
                                 </Button>
                                 <Button
                                     onClick={() => handlePageChange(setCurrentPageRemoved, currentPageRemoved, 1)}
-                                    isDisabled={currentPageRemoved >= Math.ceil(removedFunctions.length / pageSize) - 1}
+                                    isDisabled={currentPageRemoved >= Math.ceil(filteredRemovedFunctionsLength / pageSize) - 1}
                                 >
                                     Next
                                 </Button>
@@ -178,7 +197,7 @@ const RecentChanges = ({ componentParam }) => {
                                             <Th>Function Name</Th>
                                         </Tr>
                                     </Thead>
-                                    <Tbody>{renderTableData(removedFunctions, currentPageRemoved)}</Tbody>
+                                    <Tbody>{renderTableData(removedFunctions, currentPageRemoved, setFilteredRemovedFunctionsLength)}</Tbody>
                                 </Table>
                             </Card>
                         )}
