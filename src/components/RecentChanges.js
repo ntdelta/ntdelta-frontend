@@ -9,8 +9,10 @@ const RecentChanges = ({ componentParam }) => {
     const [removedFunctions, setRemovedFunctions] = useState([]);
     const [currentPageAdded, setCurrentPageAdded] = useState(0);
     const [currentPageRemoved, setCurrentPageRemoved] = useState(0);
-    const [isCollapsed, setIsCollapsed] = useState(false); // Initially collapsed
-    const pageSize = 10; // Items per page
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isRegexCollapsed, setIsRegexCollapsed] = useState(false); // State for regex filters visibility
+    const [activeFilters, setActiveFilters] = useState([]);
+    const pageSize = 10;
     const toast = useToast();
 
     useEffect(() => {
@@ -37,9 +39,42 @@ const RecentChanges = ({ componentParam }) => {
         fetchData();
     }, [componentParam]);
 
+    const regexFilters = [
+        { label: "Pascal Case", value: "^[A-Z][a-zA-Z0-9]*$", id: 1 },
+        { label: "Feature Flag", value: "^Feature_[A-Za-z0-9_]+$", id: 2 }
+    ];
+
+    const toggleFilter = (filterValue) => {
+        if (activeFilters.includes(filterValue)) {
+            setActiveFilters(activeFilters.filter(f => f !== filterValue));
+        } else {
+            setActiveFilters([...activeFilters, filterValue]);
+        }
+    };
+
+    const toggleCollapse = () => {
+        setIsCollapsed(!isCollapsed);
+        // Automatically collapse regex filters when hiding recent changes
+        if (!isCollapsed) setIsRegexCollapsed(true);
+    };
+
+    const toggleRegexCollapse = () => {
+        setIsRegexCollapsed(!isRegexCollapsed);
+    };
+
+    const filterDataByRegex = (data) => {
+        if (activeFilters.length === 0) return data;
+        return data.filter((func) =>
+            activeFilters.every(pattern => 
+                new RegExp(pattern).test(func)
+            )
+        );
+    };
+
     const renderTableData = (data, currentPage) => {
         const startIndex = currentPage * pageSize;
-        const selectedFunctions = data.slice(startIndex, startIndex + pageSize);
+        const filteredData = filterDataByRegex(data);
+        const selectedFunctions = filteredData.slice(startIndex, startIndex + pageSize);
         return selectedFunctions.map((func, index) => (
             <Tr key={index}>
                 <Td>{func}</Td>
@@ -51,17 +86,34 @@ const RecentChanges = ({ componentParam }) => {
         setPageFunction(currentPage + change);
     };
 
-    const toggleCollapse = () => {
-        setIsCollapsed(!isCollapsed);
-    };
-
     return (
         <Box>
-            <Button onClick={toggleCollapse} size="sm" mb="4">
-                {isCollapsed ? 'Show Recent Changes' : 'Hide Recent Changes'}
-            </Button>
+            <HStack mb="4">
+                <Button onClick={toggleCollapse} size="sm">
+                    {isCollapsed ? 'Show Recent Changes' : 'Hide Recent Changes'}
+                </Button>
+                {!isCollapsed && (
+                    <Button onClick={toggleRegexCollapse} size="sm">
+                        {isRegexCollapsed ? 'Show Regex Filters' : 'Hide Regex Filters'}
+                    </Button>
+                )}
+            </HStack>
             <Collapse in={!isCollapsed} animateOpacity>
-                <Flex direction={{ base: "column", md: "row" }} gap="10">
+                <Collapse in={!isRegexCollapsed} animateOpacity>
+                    <HStack mb="4">
+                        {regexFilters.map(filter => (
+                            <Button
+                                key={filter.id}
+                                size="xs"
+                                colorScheme={activeFilters.includes(filter.value) ? "blue" : "gray"}
+                                onClick={() => toggleFilter(filter.value)}
+                            >
+                                {filter.label}
+                            </Button>
+                        ))}
+                    </HStack>
+                </Collapse>
+                 <Flex direction={{ base: "column", md: "row" }} gap="10">
                     {/* Added Functions Table */}
                     <Box flex="1">
                         <HStack justifyContent="space-between">
@@ -98,7 +150,6 @@ const RecentChanges = ({ componentParam }) => {
                             </Card>
                         )}
                     </Box>
-                    {/* Removed Functions Table */}
                     <Box flex="1">
                         <HStack justifyContent="space-between">
                             <Text mb="4" fontSize="xl" fontWeight="bold">Recently Removed Functions</Text>
