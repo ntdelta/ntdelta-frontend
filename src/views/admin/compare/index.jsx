@@ -11,17 +11,23 @@ import {
   GridItem,
   Text,
   Button,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td
 } from "@chakra-ui/react";
 // Assets
 
 import Card from "components/card/Card.js";
+import CopyButton from "components/CopyButton.js"
 import BannerHeaderCompare from "views/admin/profile/components/BannerHeaderCompare";
 import avatar from "assets/img/avatars/avatar4.png";
 import React, { useState, useEffect } from "react";
 import { useLocation, Link } from 'react-router-dom';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { MdCompareArrows , MdCall } from "react-icons/md"
-import { comment } from "stylis";
 import Select from 'react-select'
 
 var md5 = require('md5');
@@ -163,6 +169,13 @@ function getAddedFunctions(leftFunctionData, rightFunctionData) {
   return addedFunctions
 }
 
+function generateCyberChefURL(code1, code2) {
+  const base64CodeDiff = btoa(code1 + "\nNtDelta Sample 2:\n" + code2)
+  const baseCyberChefURL = "https://gchq.github.io/CyberChef/#recipe=";
+  const diffRecipe = "Diff('NtDelta Sample 2:','Line',true,true,false,true)";
+  const input = encodeURIComponent(base64CodeDiff);
+  return `${baseCyberChefURL}${encodeURIComponent(diffRecipe)}&input=${input}`;
+}
 
 function fetchFunctionData(paramValue, setFunctionData, setFunctionLoading) {
   return async () => {
@@ -179,12 +192,12 @@ function fetchFunctionData(paramValue, setFunctionData, setFunctionLoading) {
   };
 }
 
-
-
 export default function CompareDllReport() {
 
   const handleFunctionChange = (selectedOption) => {
     setSelectedFunction(selectedOption.label);
+
+    searchForFunctionCalls(selectedOption.label);
   };
 
   const handleSwapClick = () => {
@@ -193,6 +206,31 @@ export default function CompareDllReport() {
     const selectValue1 = params.get("second_id");
     window.location.href = `https://ntdelta.dev/admin/compare/?first_id=${selectValue1}&second_id=${selectValue2}`;
   }
+
+  const searchForFunctionCalls = (functionName) => {
+    // Assuming leftFunctionData and rightFunctionData are arrays of function objects
+    const allFunctions = [...(leftFunctionData || []), ...(rightFunctionData || [])];
+  
+    let results = allFunctions.filter((func) => {
+      // Ensure the function is not the currently selected function
+      if (func.function_name?.trim().toLowerCase() === functionName?.trim().toLowerCase()) {
+        return false;
+      }
+      
+      // Use a regex to find function calls; adjust the regex as needed for your specific code syntax
+      const regex = new RegExp(`\\b${functionName}\\b`, 'g');
+      return regex.test(func.function_c);
+    });
+  
+    // Deduplicate results based on function_name
+    results = Array.from(new Set(results.map(func => func.function_name)))
+      .map(name => {
+        return results.find(func => func.function_name === name);
+      });
+  
+    setSearchResults(results);
+  };
+  
   
   const [leftBannerData, setLeftBannerData] = useState(null);
   const [rightBannerData, setRightBannerData] = useState(null);
@@ -210,6 +248,7 @@ export default function CompareDllReport() {
   const [changedDiff, setChangedDiff] = useState(null);
   const [removedDiff, setRemovedDiff] = useState(null);
   const [consistentDiff, setConsistentDiff] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
 
   const location = useLocation();
   
@@ -386,9 +425,6 @@ export default function CompareDllReport() {
       label: option.function_name
     }))} />)
 
-    // setDoneDiff(true)
-    // this.forceUpdate()
-
   var functionInLeft = leftFunctionData.find((func) => func.function_name === selectedFunction)
   var functionInRight = rightFunctionData.find((func) => func.function_name === selectedFunction)
 
@@ -485,7 +521,39 @@ export default function CompareDllReport() {
                             {addedFunctionComponents}
                         </Card>
                     </SimpleGrid>
+                    {functionInLeft && functionInRight && (
+                      <Flex justify="flex-end">
+                        <Button
+                          onClick={() => {
+                            const url = generateCyberChefURL(functionInLeft.function_c, functionInRight.function_c);
+                            window.open(url, '_blank');
+                          }}
+                          size="xs"
+                          colorScheme="gray"
+                          mb="1"
+                        >
+                          CyberChef
+                        </Button>
+                        <CopyButton textToCopy={functionInLeft.function_c + "\n\n\n" + functionInRight.function_c} />
+                      </Flex>
+                    )}
             {selectedFunctionCode}
+            {selectedFunction && searchResults.length > 0 && (
+              <Box mt="20px">
+                <Text fontWeight='bold'>Functions that call {selectedFunction}():</Text>
+                <Flex wrap="wrap" gap="2" mt="2">
+                  {searchResults.map((result) => (
+                    <Button
+                      key={result.id}
+                      size="sm"
+                      onClick={() => setSelectedFunction(result.function_name)}
+                    >
+                      {result.function_name}
+                    </Button>
+                    ))}
+                </Flex>
+              </Box>
+            )}
         </>
       )}
     </Box>

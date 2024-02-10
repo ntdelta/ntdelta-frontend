@@ -22,7 +22,6 @@ import { MdAutoGraph } from "react-icons/md";
 import IconBox from "components/icons/IconBox";
 import Card from "components/card/Card.js";
 import MiniStatistics from "components/card/MiniStatistics";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import BannerDLL from "views/admin/profile/components/BannerDLL";
 import avatar from "assets/img/avatars/avatar4.png";
 import { InsiderPreviewContext } from "index";
@@ -267,7 +266,6 @@ export default function DllReport() {
             </Text>
             <TableContainer>
               <Table variant='simple'>
-                {/* <TableCaption>Imperial to metric conversion factors</TableCaption> */}
                 <Thead>
                   <Tr>
                     <Th>DLL Version</Th>
@@ -277,7 +275,6 @@ export default function DllReport() {
                     <Th>Function Count</Th>
                     <Th>Hash</Th>
                     <Th></Th>
-                    {/* <Th></Th> */}
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -304,7 +301,6 @@ export default function DllReport() {
                             <Button>Open</Button>
                           </Link>
                         </Td>
-                        {/* <Td><Button>Download</Button></Td> */}
                       </Tr>
                     );
                   })}

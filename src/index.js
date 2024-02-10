@@ -1,25 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import 'assets/css/App.css';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import AdminLayout from 'layouts/admin';
 import QuickDiffModal from 'components/QuickDiffModal.js';
-import { Link, Flex, Box, Image, ChakraProvider, Switch as ChakraSwitch } from '@chakra-ui/react';
+import { Link, Flex, Box, Image, ChakraProvider, Button, Icon } from '@chakra-ui/react';
 import theme from 'theme/theme';
 import { ThemeEditorProvider } from '@hypertheme-editor/chakra-ui';
 import avatar from "assets/img/logos/NtDelta-logos_transparent.png";
+import { MdArrowDownward, MdArrowUpward } from "react-icons/md";
 
 export const InsiderPreviewContext = React.createContext(null);
 
 const App = () => {
     const [insiderPreview, setInsiderPreview] = React.useState(true);
-    
-    const toggleInsiderPreview = () => {
-        console.log("Insider Preview: ", insiderPreview, " => ", !insiderPreview )
+    const [isNarrowScreen, setIsNarrowScreen] = useState(false);
+    const [isNearBottom, setIsNearBottom] = useState(false);
 
-        // Toggle the insiderPreview state
+    const toggleInsiderPreview = () => {
         setInsiderPreview(!insiderPreview);
-      };
+    };
+
+    const handleScroll = () => {
+        const bottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
+        setIsNearBottom(bottom);
+    };
+
+    const scrollToBottomOrTop = () => {
+        if (isNearBottom) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+        const checkScreenSize = () => {
+            setIsNarrowScreen(window.innerWidth < 768);
+        };
+
+        checkScreenSize();
+        window.addEventListener('resize', checkScreenSize);
+
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
 
     return (
       <ChakraProvider theme={theme}>
@@ -33,28 +62,34 @@ const App = () => {
                         <Image maxWidth="sm" src={avatar} alt="senpai" />
                     </a>
                     <Box
-                        position="absolute"
-                        top="10px"
+                        position="fixed" 
+                        top={isNearBottom ? "auto" : "10px"}
+                        bottom={isNearBottom ? "10px" : "auto"}
                         left="10px"
+                        zIndex="docked" 
                     >
-                        <Box flex="1" align="right">
+                        <Flex align="center">
                             <QuickDiffModal/>
-                        </Box>
+                            <Button onClick={scrollToBottomOrTop} ml={2} colorScheme="gray">
+                                <Icon as={isNearBottom ? MdArrowUpward : MdArrowDownward}/>
+                            </Button>
+                        </Flex>
                     </Box>
+
                     <Box
                         position="absolute"
                         top="10px"
                         right="10px"
                     >
-                        <Box flex="1" align="right">
-                            <ChakraSwitch
-                            isChecked={insiderPreview}
-                            onChange={toggleInsiderPreview}
-                            colorScheme="teal"
-                            size="lg"
-                            />
-                        </Box>
-                        <Box ml={3}>{insiderPreview ? "Insider Preview: On" : "Insider Preview: Off"}</Box>
+                        <Flex align="center">
+                            <Button 
+                                onClick={toggleInsiderPreview} 
+                                colorScheme={insiderPreview ? "blue" : "gray"}
+                                fontSize="sm"
+                            >
+                                {isNarrowScreen ? "IP" : "Insider Preview"}
+                            </Button>
+                        </Flex>
                     </Box>
                   </Flex>
                 </Link>
@@ -70,8 +105,8 @@ const App = () => {
     );
   };
   
-  const rootElement = document.getElementById('root');
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(<App />);
-  
-  export default App;
+const rootElement = document.getElementById('root');
+const root = ReactDOM.createRoot(rootElement);
+root.render(<App />);
+
+export default App;
