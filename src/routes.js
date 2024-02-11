@@ -7,6 +7,7 @@ import {
 import MainDashboard from "views/admin/default";
 import DllReport from "views/admin/dllinstance";
 import DllDetails from "views/admin/dll";
+import Patch from "views/admin/patch";
 import CompareDllReport from "views/admin/compare";
 import roadmap from "views/admin/roadmap";
 
@@ -61,6 +62,21 @@ const routes = [
       />
     ),
     component: CompareDllReport,
+    secondary: true,
+  },
+  {
+    name: "Patch",
+    layout: "/admin",
+    path: "/patch",
+    icon: (
+      <Icon
+        as={MdHome}
+        width='20px'
+        height='20px'
+        color='inherit'
+      />
+    ),
+    component: Patch,
     secondary: true,
   },
   {

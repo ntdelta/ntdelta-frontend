@@ -11,11 +11,13 @@ import {
 // Assets
 import MiniStatistics from "components/card/MiniStatistics";
 import IconBox from "components/icons/IconBox";
+import PatchList from "components/PatchList";
 import Banner from "views/admin/profile/components/Banner";
 import avatar from "assets/img/avatars/avatar4.png";
 import React, { useState, useEffect, useContext } from "react";
 import { MdAutoGraph, MdEqualizer, MdInsights } from "react-icons/md";
 import { InsiderPreviewContext } from "index";
+import PatchDetail from "components/PatchDetail";
 
 function getTotalCount(apiResponse) {
   let totalCount = 0;
@@ -226,6 +228,8 @@ export default function UserReports() {
           <SimpleGrid columns={{ base: 1, md: 2, xl: 2 }} gap="20px">
             {banners}
           </SimpleGrid>
+
+          <PatchList />
         </>
       )}
 
