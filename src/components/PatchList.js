@@ -7,7 +7,7 @@ const PatchList = () => {
   const [patches, setPatches] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/patches/')
+    fetch('https://api.ntdelta.dev/api/patches/')
       .then(response => response.json())
       .then(data => setPatches(data))
       .catch(error => console.error('Error fetching patches:', error));

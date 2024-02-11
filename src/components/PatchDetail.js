@@ -47,7 +47,7 @@ const PatchDetails = ({ id }) => {
   useEffect(() => {
     const fetchPatchData = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/patch/${id}`);
+        const response = await fetch(`https://api.ntdelta.dev/api/patch/${id}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
