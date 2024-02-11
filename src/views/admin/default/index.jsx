@@ -1,12 +1,11 @@
 import {
   Box,
-  Flex,
   Icon,
   SimpleGrid,
   useColorModeValue,
   Spinner,
   AbsoluteCenter,
-  Switch
+  Heading
 } from "@chakra-ui/react";
 // Assets
 import MiniStatistics from "components/card/MiniStatistics";
@@ -228,7 +227,7 @@ export default function UserReports() {
           <SimpleGrid columns={{ base: 1, md: 2, xl: 2 }} gap="20px">
             {banners}
           </SimpleGrid>
-
+          <Heading mt={"2"} mb={"2"} as="h2" size="lg" align={"center"}>Security Patches</Heading>
           <PatchList />
         </>
       )}

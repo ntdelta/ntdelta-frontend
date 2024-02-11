@@ -14,8 +14,9 @@ function DoubleUpFunctions(function_data) {
             isExpanded: false // Initial state for each function's expand/collapse state
         };
 
+        // Ensure the structure exists for both pre and post, initializing as undefined
         if (!functionsCombined[name]) {
-            functionsCombined[name] = {};
+            functionsCombined[name] = { func_pre: undefined, func_post: undefined };
         }
 
         if (instanceId === function_data.pre_patch_dll.id) {
@@ -25,11 +26,18 @@ function DoubleUpFunctions(function_data) {
         }
     });
 
-    return (Object.keys(functionsCombined).map(key => ({
-        func_name: key,
-        ...functionsCombined[key]
-    })))
+    // Map to the desired structure, checking for existence of pre and post details
+    return Object.keys(functionsCombined).map(key => {
+        const func = functionsCombined[key];
+        // No need to provide default values for missing pre or post details here
+        return {
+            func_name: key,
+            ...func
+        };
+    });
 }
+
+
 
 const PatchDetails = ({ id }) => {
   const [patchData, setPatchData] = useState(null);
@@ -58,8 +66,7 @@ const PatchDetails = ({ id }) => {
 
   const toggleExpand = (index) => {
     const updatedFunctions = [...functions];
-    updatedFunctions[index].func_pre.isExpanded = !updatedFunctions[index].func_pre.isExpanded;
-    updatedFunctions[index].func_post.isExpanded = updatedFunctions[index].func_pre.isExpanded; // Sync expand/collapse state between pre and post
+    updatedFunctions[index].func_post.isExpanded = !updatedFunctions[index].func_post.isExpanded; // Sync expand/collapse state between pre and post
     setFunctions(updatedFunctions);
   };
 
@@ -69,10 +76,11 @@ const PatchDetails = ({ id }) => {
   return (
     <>
          <Card padding="4" bg="gray.100" maxW="6xl" margin="auto">
+         <Button size="xs" position="absolute" top="1" right="1" onClick={() => window.location.href = `/admin/compare/?first_id=${patchData.pre_patch_dll.id}&second_id=${patchData.post_patch_dll.id}`}>View full diff</Button>
         <VStack spacing="5" align="stretch">
-            <Heading align={"center"} as="h2" size="lg">{patchData.name}</Heading>
-            <Text fontSize="md">{patchData.description}</Text>
-            <Link href={patchData.url} isExternal color="blue.500">{patchData.url}</Link>
+            <Heading align={"center"} as="h2" size="lg">{patchData.name} in {patchData.dll}</Heading>
+            <Text align={"center"} fontSize="md">{patchData.description}</Text>
+            <Link align={"center"} href={patchData.url} isExternal color="blue.500">{patchData.url}</Link>
             
             <Text align={"center"}>Pre-patch SHA256: 
             <Button ml="2" size="sm" onClick={() => window.location.href = `/admin/dllinstance/?id=${patchData.pre_patch_dll.id}`}>
@@ -86,31 +94,42 @@ const PatchDetails = ({ id }) => {
             </Text>
         </VStack>
         </Card>
-        <Heading mt={"2"} mb={"2"} as="h3" size="md" align={"center"}>Patched Functions</Heading>
+        <Heading mt={"2"} mb={"2"} as="h2" size="lg" align={"center"}>Patched Functions</Heading>
 
         {functions.map((func, index) => (
-        <Card key={index} bg="white" p="4" rounded="md" shadow="sm" mb={"4"}>
-            <Heading as='h3' size='lg' fontWeight="bold" align={"center"}>{func.func_name}</Heading>
-            <Button onClick={() => toggleExpand(index)}>{func.func_pre.isExpanded ? 'Collapse' : 'Expand'}</Button>
+        <Card key={index} bg="white" p="4" rounded="md" shadow="sm" mb={"4"} position="relative">
+            <Button size="xs" position="absolute" top="1" right="1" onClick={() => toggleExpand(index)}>{func.func_pre?.isExpanded ? 'Collapse' : 'Expand'}</Button>
+            <Heading as='h5' size='md' fontWeight="bold" align={"center"}>{func.func_name}</Heading>
 
-            {func.func_pre.isExpanded && (
+            {func.func_post?.isExpanded && (
                 <>
                 <Flex direction={{ base: "column", md: "row" }} mt="4" gap="4" justify="center" align="stretch">
-                    <Card fontSize="m" w={{ base: "100%", md: "50%" }} p="2">
-                        <Heading  align={"center"} as='h4' size='md' >{func.func_pre.title}</Heading>
-                        <Text>{func.func_pre.description}</Text>
-                    </Card>
-                    <Card fontSize="m" w={{ base: "100%", md: "50%" }} p="2">
-                        <Heading  align={"center"} as='h4' size='md'>{func.func_post.title}</Heading>
-                        <Text>{func.func_post.description}</Text>
-                    </Card>
+                    {func.func_pre && (
+                        <Card fontSize="m" w={{ base: "100%", md: "50%" }} p="2">
+                            <Heading align={"center"} as='h4' size='md'>Pre-Patch implementation</Heading>
+                            <Heading mt={"2"} mb={"2"} as='h5' size='sm'>{func.func_pre.title}</Heading>
+                            <Text>{func.func_pre.description}</Text>
+                        </Card>
+                    )}
+                    {func.func_post && (
+                        <Card fontSize="m" w={{ base: "100%", md: func.func_pre ? "50%" : "100%" }} p="2">
+                            <Heading align={"center"} as='h4' size='md'>Post-Patch implementation</Heading>
+                            <Heading mt={"2"} mb={"2"} as='h5' size='sm'>{func.func_post.title}</Heading>
+                            <Text>{func.func_post.description}</Text>
+                        </Card>
+                    )}
                 </Flex>
                     <Divider />
-                    <ReactDiffViewer disableWordDiff={true} rightTitle={func.func_post.name} leftTitle={func.func_pre.name} useDarkTheme={true} oldValue={func.func_pre.code} newValue={func.func_post.code} splitView={true} />
+                    {func.func_pre ? 
+                         <ReactDiffViewer disableWordDiff={true} rightTitle={func.func_name || ''} leftTitle={func.func_name || ''} useDarkTheme={true} oldValue={func.func_pre?.code || ''} newValue={func.func_post?.code || ''} splitView={true} />
+
+                    : 
+                        <ReactDiffViewer showDiffOnly={false} rightTitle={func.func_name} leftTitle={func.func_name || ''}  splitView={false} useDarkTheme={true} newValue={func.func_post?.code}   />
+                    }
                 </>
             )}
         </Card>
-        ))}
+    ))}
     </>
   );
 };
