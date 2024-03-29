@@ -51,6 +51,17 @@ function getFunctionLength(inputString1) {
     return agnosticLeftCode.split(/\r|\r\n|\n/g).length;
 }
 
+function startsWithFUN(param) {
+    console.log("check")
+    var prefixes = ["FUN_", "_", "Gv", "@"]
+    for (const prefix of prefixes) {
+        if (param.startsWith(prefix)) {
+          return false; // Exclude if it starts with any prefix
+        }
+      }
+      return true; // Include if it doesn't start with any prefix
+}
+
 const FunctionSearch = ({ dllName }) => {
     const [functionNames, setFunctionNames] = useState([]);
     const [selectedFunction, setSelectedFunction] = useState('');
@@ -66,7 +77,7 @@ const FunctionSearch = ({ dllName }) => {
         if (dllName) {
             const response = await fetch(`https://api.ntdelta.dev/api/functions?dll_name=${dllName}`);
             const data = await response.json();
-            setFunctionNames(data.map((item) => item.function_name)); // Extract function names
+            setFunctionNames(data.filter(startsWithFUN)); // Extract function names
         } else {
             setFunctionNames([]); // Clear function list if no DLL name
         }
@@ -120,7 +131,7 @@ const FunctionSearch = ({ dllName }) => {
             <Collapse in={!isCollapsed} animateOpacity>
                 <Select onChange={handleFunctionChange} options={functionSelectOptions} />
                 {searchResult ? (
-                    <div className="container" style={{width:"100%", height:"400px", marginTop : "40px"}}>
+                    <div className="container" style={{ width: "100%", height: "400px", marginTop: "40px" }}>
                         <Graph
                             title=""
                             fillWidth={true}
