@@ -21,6 +21,7 @@ import {
 import { MdAutoGraph } from "react-icons/md";
 import IconBox from "components/icons/IconBox";
 import Card from "components/card/Card.js";
+import FunctionSearch from "components/FunctionSearch.js";
 import MiniStatistics from "components/card/MiniStatistics";
 import BannerDLL from "views/admin/profile/components/BannerDLL";
 import avatar from "assets/img/avatars/avatar4.png";
@@ -259,7 +260,7 @@ export default function DllReport() {
           <Box>
             <RecentChanges componentParam={paramValue} />
           </Box>
-
+          <FunctionSearch dllName={filterInsiderPreview(bannerData).dll.name} />
           <Card mb={{ base: "0px", lg: "20px" }} mt="20px" align='center'>
             <Text mb={{ base: "0px", lg: "20px" }} fontWeight='bold' fontSize='xl'>
               DLL Instances
